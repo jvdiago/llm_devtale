@@ -1,0 +1,222 @@
+from dataclasses import dataclass, field
+from typing import List, Optional, Set
+from pathlib import Path
+import os
+
+# Extensions to consider as text files
+DEFAULT_TEXT_EXTENSIONS = [
+    ".py",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".java",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".cs",
+    ".go",
+    ".rs",
+    ".rb",
+    ".php",
+    ".css",
+    ".scss",
+    ".sass",
+    ".less",
+    ".md",
+    ".rst",
+    ".txt",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".ini",
+    ".json",
+    ".xml",
+    ".sh",
+    ".bat",
+    ".ps1",
+    ".R",
+    ".kt",
+    ".swift",
+    ".m",
+    ".mm",
+    ".pl",
+    ".pm",
+    ".sql",
+    ".graphql",
+    ".lua",
+    ".ex",
+    ".exs",
+    ".erl",
+    ".elm",
+    ".clj",
+    ".scala",
+    ".dart",
+    ".vue",
+    ".svelte",
+    ".sol",
+    ".pde",
+    ".proto",
+    ".groovy",
+    ".jl",
+    ".cf",
+    ".tf",
+    ".kt",
+    ".kts",
+]
+
+DISALLOWED_FOLDERS: list[str] = [
+    "**/*test*",
+    "**/*mock*",
+    "**/migrations",
+    "**/settings",
+    "**/node_modules",
+    "**/vendor",
+    "**/debug",
+    "**/target",
+    "**/dist",
+    "**/build",
+    "**/public",
+    "**/generic",
+    "**/examples",
+    "**/docs",
+    "**/themes",
+    "**/templates",
+    "**/fixtures",
+    "**/assets",
+    "**/static",
+    "**/scripts",
+    "**/images",
+    "**/styles",
+    "**/stylesheets",
+    "**/html",
+    "**/e2e",
+    "**/i18n",
+    "**/fonts",
+    "**/locales",
+    "**/contrib",
+    "**/localizations",
+    "**/translations",
+    "**/cards",
+    "**/.git",
+    "**/__pycache__",
+    "**/venv",
+    "**/env",
+    "**/.pytest_cache",
+    "**/.mypy_cache",
+    "**/.ruff_cache",
+    "**/.vscode",
+    "**/.idea",
+    "**/.DS_Store",
+]
+DISALLOWED_FILES = [
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    "*.so",
+    "*.dll",
+    "*.exe",
+    "*.bin",
+    "*.obj",
+    "*.o",
+    "*.a",
+    "*.lib",
+    "*.dylib",
+    "*.ncb",
+    "*.sdf",
+    "*.suo",
+    "*.pdb",
+    "*.idb",
+    ".env",
+    "*.egg-info",
+    "*.egg",
+    ".tox",
+    ".nox",
+    ".coverage",
+    "*.min.js",
+    "*.min.css",
+    "*.map",
+    "package-lock.json",
+    "yarn.lock",
+    "*.swp",
+    "*.swo",
+    ".ipynb_checkpoints",
+]
+
+MIN_CODE_LENGTH: int = 500
+
+MAX_TOKENS_PER_PROJECT: int = 200000
+MAX_TOKENS_PER_FILE: int = 20000
+
+README_VALID_FILES = ["README.md", "Readme.md", "readme.md"]
+
+
+@dataclass
+class ParserConfig:
+    directory: Path = field(default_factory=lambda: Path("."))
+    model_name: str = "gemini/gemini-2.5-flash-preview-04-17"
+
+    max_tokens_per_project: int = MAX_TOKENS_PER_PROJECT
+
+    allowed_extensions: List[str] = field(
+        default_factory=lambda: DEFAULT_TEXT_EXTENSIONS.copy()
+    )
+    disallowed_folders: List[str] = field(
+        default_factory=lambda: DISALLOWED_FOLDERS.copy()
+    )
+    disallowed_files: List[str] = field(default_factory=lambda: DISALLOWED_FILES.copy())
+    exclude_patterns: List[str] = field(default_factory=list)
+    filter_extensions: Optional[Set[str]] = None
+    min_code_lenght: int = MIN_CODE_LENGTH
+    ignore_patterns: List[str] = field(init=False)  # Will be set in __post_init__
+
+    max_tokens_per_file: int = MAX_TOKENS_PER_FILE
+    readme_valid_files: List[str] = field(
+        default_factory=lambda: README_VALID_FILES.copy()
+    )
+
+    skip_folder_readme: bool = False
+    cache_dir: Path = field(
+        default_factory=lambda: Path(os.path.expanduser("~/.cache/llm-devtale"))
+    )
+
+    def __post_init__(self):
+        """Validate and normalize configuration after initialization."""
+        self.ignore_patterns = (
+            self.disallowed_files + self.disallowed_folders + self.exclude_patterns
+        )
+        # Convert string paths to Path objects
+        if isinstance(self.directory, str):
+            self.directory = Path(self.directory).resolve()
+        if isinstance(self.cache_dir, str):
+            self.cache_dir = Path(self.cache_dir)
+        # Create cache directory if it doesn't exist
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        # Normalize filter_extensions
+        if self.filter_extensions:
+            # Ensure all extensions start with a dot
+            self.filter_extensions = {
+                ext if ext.startswith(".") else f".{ext}"
+                for ext in self.filter_extensions
+            }
+
+    @classmethod
+    def from_cli_args(cls, **kwargs) -> "ParserConfig":
+        """Create configuration from command-line arguments."""
+        # Filter out None values to allow defaults to take effect
+        filtered_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        # Special handling for extensions
+        if "allowed_extensions" in filtered_kwargs:
+            extensions = filtered_kwargs.pop("allowed_extension")
+            if extensions:
+                filtered_kwargs["allowed_extensions"] = {
+                    ext if ext.startswith(".") else f".{ext}" for ext in extensions
+                }
+
+        # Special handling for exclude patterns
+        if "exclude" in filtered_kwargs:
+            filtered_kwargs["exclude_patterns"] = filtered_kwargs.pop("exclude")
+
+        return cls(**filtered_kwargs)
