@@ -3,7 +3,8 @@ from pathlib import Path
 from typing import List, Optional
 
 
-from .utils import split_text, generate_summary, NodeType, Node, get_llm_model
+from .utils import generate_summary, get_llm_model
+from .node import NodeType, Node
 from .config import ParserConfig
 
 
@@ -37,6 +38,17 @@ class Parser:
 
 
 class ProjectParser(Parser):
+    def get_readme(self) -> str:
+        original_readme_content: str = ""
+        for readme in self.parser_config.readme_valid_files:
+            readme_path = os.path.join(self.root_path, readme)
+            if os.path.exists(readme_path):
+                with open(readme_path, "r") as file:
+                    original_readme_content = " ".join(file.readlines())
+                    break
+
+        return original_readme_content
+
     def parse(
         self,
     ) -> Node:
@@ -101,9 +113,11 @@ class ProjectParser(Parser):
 
         project_summary = ""
         if project_node.children and not self.parser_config.skip_folder_readme:
+            original_readme = self.get_readme()
             project_data: dict = {
                 "project_name": repository_name,
                 "project_content": folder_tales,
+                "project_readme": original_readme,
             }
             model = get_llm_model(self.parser_config.model_name)
             project_summary = generate_summary(
@@ -185,7 +199,7 @@ class FileParser(Parser):
         # care about understanding what the file does.
         if not file_ext:
             # a small single chunk is enough
-            code_text: str = split_text(code, chunk_size=5000)
+            code_text: str = code
 
         file_data: dict[str, str] = {
             "file_name": file_name,

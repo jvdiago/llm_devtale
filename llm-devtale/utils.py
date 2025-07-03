@@ -1,9 +1,19 @@
 import tiktoken
 import llm
+from .node import NodeType
+from typing import Dict
+from .templates import (
+    ROOT_LEVEL_TEMPLATE,
+    SYSTEM_PROMPT,
+    FOLDER_SHORT_DESCRIPTION_TEMPLATE,
+    FILE_TEMPLATE,
+)
 
-from dataclasses import dataclass, field
-from typing import List
-from enum import Enum
+prompts: Dict[NodeType, str] = {
+    NodeType.FILE: FILE_TEMPLATE,
+    NodeType.FOLDER: FOLDER_SHORT_DESCRIPTION_TEMPLATE,
+    NodeType.REPOSITORY: ROOT_LEVEL_TEMPLATE,
+}
 
 
 class TokenCounter:
@@ -12,39 +22,22 @@ class TokenCounter:
         return len(tiktoken.get_encoding("cl100k_base").encode(text))
 
 
-def split_text(text: str, chunk_size: int = 1000) -> str:
-    return text
+def get_prompt(summary_type: NodeType) -> str:
+    prompt: str = prompts.get(summary_type, "")
+    if not prompt:
+        raise Exception("No template found with {summary_type}")
 
-
-class NodeType(Enum):
-    FILE = "file"
-    FOLDER = "folder"
-    REPOSITORY = "project"
-
-
-@dataclass
-class Node:
-    name: str
-    description: str
-    node_type: NodeType
-
-    children: List["Node"] = field(default_factory=list)
-
-    def print(self, indent: int = 0):
-        spacer = " " * indent
-        print(f"{spacer}{self.name}: {self.description}")
-        for child in self.children:
-            child.print(indent + 4)
-
-    def add_children(self, children: "Node") -> None:
-        self.children.append(children)
+    return prompt
 
 
 def generate_summary(llm_model: llm.Model, data: dict, summary_type: NodeType) -> str:
-    prompt: str = ""
-    ## return llm_model.prompt(prompt).text()
-    return f"Summary for {data} of type {summary_type}"
+    prompt: str = get_prompt(summary_type).format(data=data)
+    print(prompt)
+    return llm_model.prompt(prompt, system=SYSTEM_PROMPT).text()
 
 
 def get_llm_model(model_name: str) -> llm.Model:
+    if not model_name:
+        model_name = llm.get_default_model()
+
     return llm.get_model(model_name)

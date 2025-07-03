@@ -2,15 +2,12 @@ from .gitutils import GitRepository
 from .files import FileSelector, FileRepo
 from .config import ParserConfig
 from .parser import ProjectParser
-from .utils import Node
+from .node import Node
 from pathlib import Path
 
 
 def main():
-    import pdb
-
-    pdb.set_trace()
-    repo_path = Path("./")
+    repo_path = Path("/home/vela/git/llm-devtale")
     config = ParserConfig(
         directory=repo_path, model_name="gemini/gemini-2.5-flash-preview-04-17"
     )
