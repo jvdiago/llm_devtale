@@ -27,7 +27,7 @@ def main():
         parser_config=config, valid_files=valid_files
     )
     node: Node = project_parser.parse()
-    print("Token count:", token_count)
+    print("File Token count:", token_count)
     node.print()
 
 

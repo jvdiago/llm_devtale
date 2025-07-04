@@ -3,9 +3,12 @@ from pathlib import Path
 from typing import List, Optional
 
 
-from .utils import generate_summary, get_llm_model
+from .utils import generate_summary, get_llm_model, parallel_process
 from .node import NodeType, Node
 from .config import ParserConfig
+import logging
+
+logger = logging.getLogger("llm-devtale")
 
 
 class Parser:
@@ -130,30 +133,27 @@ class FolderParser(Parser):
             name=self.folder_full_name, description="", node_type=NodeType.FOLDER
         )
 
-        # Iterate through each file in the folder
-        for file_name in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, file_name)
+        file_paths = [
+            os.path.join(folder_path, fn)
+            for fn in os.listdir(folder_path)
+            if os.path.isfile(os.path.join(folder_path, fn))
+            and not self._should_ignore(os.path.join(folder_path, fn), self.root_path)
+        ]
 
-            # Check it if is a file that we need to process
-            if os.path.isfile(file_path) and not self._should_ignore(
-                file_path, self.root_path
-            ):
-                # Create dev tale for the file
+        def make_parser(path: str) -> Optional[Node]:
+            try:
+                return FileParser(
+                    parser_config=self.parser_config,
+                    item_path=path,
+                    valid_files=self.valid_files,
+                ).parse()
+            except Exception:
+                logger.exception(f"failed parsing {path}")
+                return None
 
-                try:
-                    file_parser = FileParser(
-                        parser_config=self.parser_config,
-                        item_path=file_path,
-                        valid_files=self.valid_files,
-                    )
-                    file_tale = file_parser.parse()
-                except Exception:
-                    file_tale = None
-
-                # Create a dictionary with the tale's file_docstrings values to use them
-                # as context for the folder's README section
-                if file_tale is not None:
-                    node_dir.add_children(file_tale)
+        file_tales = parallel_process(file_paths, make_parser, max_workers=8)
+        for tale in filter(None, file_tales):
+            node_dir.add_children(tale)
 
         if node_dir.children and not self.parser_config.skip_folder_readme:
             # Generate a folder one-line description using the folder's readme as context.

@@ -1,14 +1,23 @@
 import tiktoken
 import llm
 from .node import NodeType
-from typing import Dict
+from typing import Dict, Iterable, TypeVar, Callable, List
 from .templates import (
     ROOT_LEVEL_TEMPLATE,
     SYSTEM_PROMPT,
     FOLDER_SHORT_DESCRIPTION_TEMPLATE,
     FILE_TEMPLATE,
 )
+import logging
+import concurrent.futures
+import os
 
+# Configure default logger
+logger = logging.getLogger("llm-devtale")
+
+# Type variables for generic functions
+T = TypeVar("T")
+R = TypeVar("R")
 prompts: Dict[NodeType, str] = {
     NodeType.FILE: FILE_TEMPLATE,
     NodeType.FOLDER: FOLDER_SHORT_DESCRIPTION_TEMPLATE,
@@ -40,3 +49,38 @@ def get_llm_model(model_name: str) -> llm.Model:
         model_name = llm.get_default_model()
 
     return llm.get_model(model_name)
+
+
+def parallel_process(
+    items: Iterable[T], process_func: Callable[[T], R], max_workers: int = 0
+) -> List[R]:
+    """
+    Process items in parallel using a thread pool.
+
+    Args:
+        items: Items to process
+        process_func: Function to apply to each item
+        max_workers: Maximum number of worker threads
+
+    Returns:
+        List of results
+    """
+    items_list = list(items)
+    results = []
+
+    if max_workers < 1:
+        max_workers = min(10, (os.cpu_count() or 4))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = []
+        for item in items_list:
+            futures.append(executor.submit(process_func, item))
+
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()
+                results.append(result)
+            except Exception as e:
+                logger.error(f"Error in parallel processing: {e}")
+
+    return results
