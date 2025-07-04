@@ -62,11 +62,6 @@ class ProjectParser(Parser):
             description="",
             node_type=NodeType.REPOSITORY,
         )
-        folder_tales = {
-            "repository_name": repository_name,
-            "folders": [],
-        }
-
         # Get the project tree before modify it along with the complete list of files
         # that the repository has.
         file_paths = list(
@@ -106,9 +101,6 @@ class ProjectParser(Parser):
             # Create a dictionary with the folder's info that serves as context for
             # generating the main repository summary
             if folder_tale:
-                folder_tales["folders"].append(
-                    {folder_tale.name: folder_tale.description}
-                )
                 project_node.add_children(folder_tale)
 
         project_summary = ""
@@ -116,7 +108,7 @@ class ProjectParser(Parser):
             original_readme = self.get_readme()
             project_data: dict = {
                 "project_name": repository_name,
-                "project_content": folder_tales,
+                "project_content": project_node.to_dict(),
                 "project_readme": original_readme,
             }
             model = get_llm_model(self.parser_config.model_name)
@@ -134,7 +126,6 @@ class FolderParser(Parser):
         subdirectories, and it generates a summary section for the folder.
         """
         folder_path: str = self.item_path
-        tales: list = []
         node_dir = Node(
             name=self.folder_full_name, description="", node_type=NodeType.FOLDER
         )
@@ -162,14 +153,13 @@ class FolderParser(Parser):
                 # Create a dictionary with the tale's file_docstrings values to use them
                 # as context for the folder's README section
                 if file_tale is not None:
-                    tales.append(file_tale.description)
                     node_dir.add_children(file_tale)
 
         if node_dir.children and not self.parser_config.skip_folder_readme:
             # Generate a folder one-line description using the folder's readme as context.
             folder_data: dict = {
                 "folder_name": self.folder_full_name,
-                "folder_content": tales,
+                "folder_content": node_dir.to_dict(),
             }
 
             model = get_llm_model(self.parser_config.model_name)

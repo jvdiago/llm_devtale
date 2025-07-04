@@ -32,7 +32,6 @@ def get_prompt(summary_type: NodeType) -> str:
 
 def generate_summary(llm_model: llm.Model, data: dict, summary_type: NodeType) -> str:
     prompt: str = get_prompt(summary_type).format(data=data)
-    print(prompt)
     return llm_model.prompt(prompt, system=SYSTEM_PROMPT).text()
 
 

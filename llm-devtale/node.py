@@ -1,5 +1,5 @@
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass, field, asdict
+from typing import List, Dict, Any
 from enum import Enum
 
 
@@ -16,6 +16,9 @@ class Node:
     node_type: NodeType
 
     children: List["Node"] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
 
     def print(self, indent: int = 0):
         spacer = " " * indent
