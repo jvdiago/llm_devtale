@@ -13,7 +13,7 @@ import concurrent.futures
 import os
 
 # Configure default logger
-logger = logging.getLogger("llm-devtale")
+logger = logging.getLogger("llm_devtale")
 
 # Type variables for generic functions
 T = TypeVar("T")

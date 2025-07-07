@@ -1,14 +1,13 @@
+import logging
 import os
 from pathlib import Path
 from typing import List, Optional
 
-
-from .utils import generate_summary, get_llm_model, parallel_process
-from .node import NodeType, Node
 from .config import ParserConfig
-import logging
+from .node import Node, NodeType
+from .utils import generate_summary, get_llm_model, parallel_process
 
-logger = logging.getLogger("llm-devtale")
+logger = logging.getLogger("llm_devtale")
 
 
 class Parser:
@@ -107,7 +106,11 @@ class ProjectParser(Parser):
                 project_node.add_children(folder_tale)
 
         project_summary = ""
-        if project_node.children and not self.parser_config.skip_folder_readme:
+        if (
+            project_node.children
+            and not self.parser_config.skip_folder_readme
+            and not self.parser_config.dry_run
+        ):
             original_readme = self.get_readme()
             project_data: dict = {
                 "project_name": repository_name,
@@ -155,7 +158,11 @@ class FolderParser(Parser):
         for tale in filter(None, file_tales):
             node_dir.add_children(tale)
 
-        if node_dir.children and not self.parser_config.skip_folder_readme:
+        if (
+            node_dir.children
+            and not self.parser_config.skip_folder_readme
+            and not self.parser_config.dry_run
+        ):
             # Generate a folder one-line description using the folder's readme as context.
             folder_data: dict = {
                 "folder_name": self.folder_full_name,
@@ -175,7 +182,6 @@ class FileParser(Parser):
     def parse(self) -> Optional[Node | None]:
         file_path: str = self.item_path
         file_name: str = os.path.basename(file_path)
-        file_ext: str = os.path.splitext(file_name)[-1]
 
         with open(file_path, "r") as file:
             code: str = file.read()
@@ -184,19 +190,16 @@ class FileParser(Parser):
         if not code or len(code) < self.parser_config.min_code_lenght:
             return None
 
-        code_text = code
-        # For config/bash files we do not aim to document the file itself. We
-        # care about understanding what the file does.
-        if not file_ext:
-            # a small single chunk is enough
-            code_text: str = code
-
+        file_node = Node(name=file_name, description="", node_type=NodeType.FILE)
         file_data: dict[str, str] = {
             "file_name": file_name,
-            "file_content": code_text,
+            "file_content": code,
         }
+        if not self.parser_config.dry_run:
+            model = get_llm_model(self.parser_config.model_name)
+            file_summary = generate_summary(
+                model, file_data, summary_type=NodeType.FILE
+            )
+            file_node.description = file_summary
 
-        model = get_llm_model(self.parser_config.model_name)
-        file_summary = generate_summary(model, file_data, summary_type=NodeType.FILE)
-
-        return Node(name=file_name, description=file_summary, node_type=NodeType.FILE)
+        return file_node

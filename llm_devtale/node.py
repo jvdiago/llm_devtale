@@ -20,11 +20,15 @@ class Node:
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
-    def print(self, indent: int = 0):
+    def to_string(self, indent: int = 0) -> str:
         spacer = " " * indent
-        print(f"{spacer}{self.name}: {self.description}")
+        lines = [f"{spacer}{self.name} ({self.node_type.value}): {self.description}"]
         for child in self.children:
-            child.print(indent + 4)
+            lines.append(child.to_string(indent + 4))
+        return "\n".join(lines)
+
+    def print(self, indent: int = 0) -> None:
+        print(self.to_string(indent))
 
     def add_children(self, children: "Node") -> None:
         self.children.append(children)

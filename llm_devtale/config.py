@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Set
-from pathlib import Path
 import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import List
 
 # Extensions to consider as text files
 DEFAULT_TEXT_EXTENSIONS = [
@@ -20,10 +20,6 @@ DEFAULT_TEXT_EXTENSIONS = [
     ".rs",
     ".rb",
     ".php",
-    ".css",
-    ".scss",
-    ".sass",
-    ".less",
     ".md",
     ".rst",
     ".txt",
@@ -155,7 +151,7 @@ README_VALID_FILES = ["README.md", "Readme.md", "readme.md"]
 @dataclass
 class ParserConfig:
     directory: Path = field(default_factory=lambda: Path("."))
-    model_name: str = "gemini/gemini-2.5-flash-preview-04-17"
+    model_name: str = ""
 
     max_tokens_per_project: int = MAX_TOKENS_PER_PROJECT
 
@@ -167,7 +163,6 @@ class ParserConfig:
     )
     disallowed_files: List[str] = field(default_factory=lambda: DISALLOWED_FILES.copy())
     exclude_patterns: List[str] = field(default_factory=list)
-    filter_extensions: Optional[Set[str]] = None
     min_code_lenght: int = MIN_CODE_LENGTH
     ignore_patterns: List[str] = field(init=False)  # Will be set in __post_init__
 
@@ -178,8 +173,9 @@ class ParserConfig:
 
     skip_folder_readme: bool = False
     cache_dir: Path = field(
-        default_factory=lambda: Path(os.path.expanduser("~/.cache/llm-devtale"))
+        default_factory=lambda: Path(os.path.expanduser("~/.cache/llm_devtale"))
     )
+    dry_run: bool = False
 
     def __post_init__(self):
         """Validate and normalize configuration after initialization."""
@@ -194,12 +190,12 @@ class ParserConfig:
         # Create cache directory if it doesn't exist
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         # Normalize filter_extensions
-        if self.filter_extensions:
+        if self.allowed_extensions:
             # Ensure all extensions start with a dot
-            self.filter_extensions = {
+            self.allowed_extensions = [
                 ext if ext.startswith(".") else f".{ext}"
-                for ext in self.filter_extensions
-            }
+                for ext in self.allowed_extensions
+            ]
 
     @classmethod
     def from_cli_args(cls, **kwargs) -> "ParserConfig":
