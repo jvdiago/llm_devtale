@@ -8,10 +8,9 @@ from .parser import ProjectParser
 
 
 def main():
-    repo_path = Path("/home/vela/git/llm-devtale")
+    repo_path = Path("./")
     config = ParserConfig(
         directory=repo_path,
-        model_name="gemini/gemini-2.5-flash-preview-04-17",
         dry_run=True,
     )
     git_repo: GitRepository = GitRepository(repo_path)
@@ -22,9 +21,6 @@ def main():
         ignore_patterns=config.ignore_patterns,
         allowed_extensions=config.allowed_extensions,
     )
-    import pdb
-
-    pdb.set_trace()
     valid_files, token_count = file_selector.get_files_by_token(
         max_token_count=config.max_tokens_per_project,
         max_tokens_per_file=config.max_tokens_per_file,
