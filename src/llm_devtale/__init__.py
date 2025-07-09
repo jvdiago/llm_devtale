@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 
 import click
@@ -40,6 +41,12 @@ def register_commands(cli):
         multiple=True,
         help="Only include files with these extensions",
     )
+    @click.option(
+        "--dry-run",
+        "-t",
+        is_flag=True,
+        help="Show hierarchy and files that will be analyzed without using the LLM",
+    )
     def devtale(
         directory,
         exclude,
@@ -48,24 +55,31 @@ def register_commands(cli):
         output,
         model,
         filter_extension,
+        dry_run,
     ):
         try:
+            exclude_patterns = list(exclude)
+            allowed_extensions = list(filter_extension)
+
             config = ParserConfig(
                 directory=directory,
                 model_name=model,
                 max_tokens_per_file=max_tokens_per_file,
                 max_tokens_per_project=max_tokens,
-                exclude_patterns=exclude,
-                allowed_extensions=filter_extension,
+                exclude_patterns=exclude_patterns,
+                allowed_extensions=allowed_extensions,
+                dry_run=dry_run,
             )
             git_repo: GitRepository = GitRepository(directory)
             effort: dict[str, int] = git_repo.get_git_effort()
             file_repo: FileRepo = FileRepo(directory, effort)
+
             file_selector = FileSelector(
                 file_repo,
                 ignore_patterns=config.ignore_patterns,
                 allowed_extensions=config.allowed_extensions,
             )
+
             valid_files, token_count = file_selector.get_files_by_token(
                 max_token_count=config.max_tokens_per_project,
                 max_tokens_per_file=config.max_tokens_per_file,
@@ -87,5 +101,6 @@ def register_commands(cli):
             else:
                 click.echo(result)
         except Exception as e:
-            click.echo(f"[bold red]Error: {e}")
+            click.secho(f"Error ({e.__class__.__name__}): {e!r}", fg="red")
+            click.secho(traceback.format_exc(), fg="bright_black")
             raise click.Abort()

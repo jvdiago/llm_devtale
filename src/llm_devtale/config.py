@@ -179,6 +179,14 @@ class ParserConfig:
 
     def __post_init__(self):
         """Validate and normalize configuration after initialization."""
+        if self.max_tokens_per_project is None:
+            self.max_tokens_per_project = MAX_TOKENS_PER_PROJECT
+        if self.max_tokens_per_file is None:
+            self.max_tokens_per_file = MAX_TOKENS_PER_FILE
+
+        if not self.allowed_extensions:
+            self.allowed_extensions = DEFAULT_TEXT_EXTENSIONS.copy()
+
         self.ignore_patterns = (
             self.disallowed_files + self.disallowed_folders + self.exclude_patterns
         )

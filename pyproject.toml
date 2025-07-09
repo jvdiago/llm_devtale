@@ -29,8 +29,9 @@ llm_devtale = "llm_devtale"
 requires = ["uv-build"]
 build-backend = "uv_build"
 
-[tool.setuptools]
-packages = ["llm_devtale"]
+[tool.coverage.run]
+source = ["llm_devtale", "tests"]
 
-[tool.setuptools.exclude-package-data]
-"*" = ["cache/*"]
+[tool.coverage.report]
+show_missing = true
+omit = ["src/**/main.py"]
