@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
+import llm
+
 from .config import ParserConfig
 from .node import Node, NodeType
 from .utils import generate_summary, get_llm_model, parallel_process
@@ -14,11 +16,13 @@ class Parser:
     def __init__(
         self,
         parser_config: ParserConfig,
+        model: llm.Model,
         item_path: str = "./",
         folder_full_name: str = "",
         valid_files: list = [],
     ):
         self.parser_config: ParserConfig = parser_config
+        self.model = model
         self.root_path: str = str(parser_config.directory)
         self.item_path: str = item_path
         self.folder_full_name: str = folder_full_name
@@ -91,6 +95,7 @@ class ProjectParser(Parser):
                 # folder's summary
                 folder_parser = FolderParser(
                     parser_config=self.parser_config,
+                    model=self.model,
                     item_path=folder_path,
                     folder_full_name=folder_full_name,
                     valid_files=self.valid_files,
@@ -117,9 +122,8 @@ class ProjectParser(Parser):
                 "project_content": project_node.to_dict(),
                 "project_readme": original_readme,
             }
-            model = get_llm_model(self.parser_config.model_name)
             project_summary = generate_summary(
-                model, project_data, summary_type=NodeType.REPOSITORY
+                self.model, project_data, summary_type=NodeType.REPOSITORY
             )
             project_node.description = project_summary
 
@@ -147,6 +151,7 @@ class FolderParser(Parser):
             try:
                 return FileParser(
                     parser_config=self.parser_config,
+                    model=self.model,
                     item_path=path,
                     valid_files=self.valid_files,
                 ).parse()
@@ -169,9 +174,8 @@ class FolderParser(Parser):
                 "folder_content": node_dir.to_dict(),
             }
 
-            model = get_llm_model(self.parser_config.model_name)
             folder_summary = generate_summary(
-                model, folder_data, summary_type=NodeType.FOLDER
+                self.model, folder_data, summary_type=NodeType.FOLDER
             )
             node_dir.description = folder_summary
 
@@ -196,9 +200,8 @@ class FileParser(Parser):
             "file_content": code,
         }
         if not self.parser_config.dry_run:
-            model = get_llm_model(self.parser_config.model_name)
             file_summary = generate_summary(
-                model, file_data, summary_type=NodeType.FILE
+                self.model, file_data, summary_type=NodeType.FILE
             )
             file_node.description = file_summary
 

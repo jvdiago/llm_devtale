@@ -5,6 +5,7 @@ from .files import FileRepo, FileSelector
 from .gitutils import GitRepository
 from .node import Node
 from .parser import ProjectParser
+from .utils import get_llm_model
 
 
 def main():
@@ -25,8 +26,9 @@ def main():
         max_token_count=config.max_tokens_per_project,
         max_tokens_per_file=config.max_tokens_per_file,
     )
+    model = get_llm_model(model_name=config.model_name)
     project_parser: ProjectParser = ProjectParser(
-        parser_config=config, valid_files=valid_files
+        parser_config=config, model=model, valid_files=valid_files
     )
     node: Node = project_parser.parse()
     print("File Token count:", token_count)

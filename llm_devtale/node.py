@@ -1,6 +1,6 @@
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Any
+from dataclasses import asdict, dataclass, field
 from enum import Enum
+from typing import Any, Dict, List
 
 
 class NodeType(Enum):

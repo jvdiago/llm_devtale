@@ -196,23 +196,3 @@ class ParserConfig:
                 ext if ext.startswith(".") else f".{ext}"
                 for ext in self.allowed_extensions
             ]
-
-    @classmethod
-    def from_cli_args(cls, **kwargs) -> "ParserConfig":
-        """Create configuration from command-line arguments."""
-        # Filter out None values to allow defaults to take effect
-        filtered_kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        # Special handling for extensions
-        if "allowed_extensions" in filtered_kwargs:
-            extensions = filtered_kwargs.pop("allowed_extension")
-            if extensions:
-                filtered_kwargs["allowed_extensions"] = {
-                    ext if ext.startswith(".") else f".{ext}" for ext in extensions
-                }
-
-        # Special handling for exclude patterns
-        if "exclude" in filtered_kwargs:
-            filtered_kwargs["exclude_patterns"] = filtered_kwargs.pop("exclude")
-
-        return cls(**filtered_kwargs)
