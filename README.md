@@ -92,3 +92,9 @@ llm devtale . --dry-run
 *   `-m, --model <MODEL_NAME>`: Specify the LLM model to use (e.g., `gpt-3.5-turbo`, `gpt-4`). If not set uses the default model configured in the llm cli tool
 *   `-f, --filter-extension <EXTENSION>`: Only include files with these extensions (e.g., `py`, `md`). Can be used multiple times.
 *   `-t, --dry-run`: Show the hierarchy and files that will be analyzed without making LLM calls.
+
+## Debug
+The program can be executed using an ad-hoc main.py file added for convenience:
+```
+python -m llm_devtale.main
+```

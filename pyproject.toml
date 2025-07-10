@@ -1,9 +1,16 @@
 [project]
 name = "llm_devtale"
-version = "0.1.0"
+version = "0.1.1"
 description = "LLM plugin to create a hierarchical summary description of a project"
 readme = "README.md"
 requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Javier Vela", email = "jvdiago@dagorlad.es"}
+]
+urls = {
+    "Repository" = "https://github.com/jvdiago/llm_devtale",
+}
 dependencies = [
     "click>=8.2.1",
     "gitpython>=3.1.44",
