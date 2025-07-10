@@ -1,16 +1,14 @@
-import tiktoken
-import llm
-from .node import NodeType
-from typing import Dict, Iterable, TypeVar, Callable, List
-from .templates import (
-    ROOT_LEVEL_TEMPLATE,
-    SYSTEM_PROMPT,
-    FOLDER_SHORT_DESCRIPTION_TEMPLATE,
-    FILE_TEMPLATE,
-)
-import logging
 import concurrent.futures
+import logging
 import os
+from typing import Callable, Dict, Iterable, List, TypeVar
+
+import llm
+import tiktoken
+
+from .node import NodeType
+from .templates import (FILE_TEMPLATE, FOLDER_SHORT_DESCRIPTION_TEMPLATE,
+                        ROOT_LEVEL_TEMPLATE, SYSTEM_PROMPT)
 
 # Configure default logger
 logger = logging.getLogger("llm_devtale")
@@ -84,3 +82,35 @@ def parallel_process(
                 logger.error(f"Error in parallel processing: {e}")
 
     return results
+
+
+def setup_logging(verbose: bool = False) -> None:
+    """
+    Set up logging configuration.
+
+    Args:
+        verbose: Whether to enable debug logging
+        log_file: Path to log file (optional)
+    """
+    log_level = logging.DEBUG if verbose else logging.INFO
+
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+
+    # Clear any existing handlers
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
+    # Create console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+
+    # Create formatter
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    console_handler.setFormatter(formatter)
+
+    # Add console handler to root logger
+    root_logger.addHandler(console_handler)

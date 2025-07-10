@@ -7,7 +7,7 @@ import llm
 
 from .config import ParserConfig
 from .node import Node, NodeType
-from .utils import generate_summary, get_llm_model, parallel_process
+from .utils import generate_summary, parallel_process
 
 logger = logging.getLogger("llm_devtale")
 
@@ -103,6 +103,7 @@ class ProjectParser(Parser):
 
                 folder_tale = folder_parser.parse()
             except Exception:
+                logger.exception(f"failed parsing folder {folder_path}")
                 folder_tale = None
 
             # Create a dictionary with the folder's info that serves as context for

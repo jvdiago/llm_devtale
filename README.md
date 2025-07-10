@@ -9,6 +9,9 @@ The generated documentation includes:
 
 To avoid analyzing too much boilerplate or non-important data,  the program expects the folder to be a git repository, so it can order the files by number of commits to focus on the most important files (most commits) within the limits of the tokens configured
 
+Taken inspiration (and some code) from https://github.com/tenxstudio/devtale and https://github.com/irthomasthomas/llm-cartographer
+
+The tool uses threads to speed up the analysis, up to maximum 8 threads, only for file summarization.
 ## Installation
 
 First, ensure you have `llm` installed:
@@ -92,6 +95,7 @@ llm devtale . --dry-run
 *   `-m, --model <MODEL_NAME>`: Specify the LLM model to use (e.g., `gpt-3.5-turbo`, `gpt-4`). If not set uses the default model configured in the llm cli tool
 *   `-f, --filter-extension <EXTENSION>`: Only include files with these extensions (e.g., `py`, `md`). Can be used multiple times.
 *   `-t, --dry-run`: Show the hierarchy and files that will be analyzed without making LLM calls.
+*   `-d, --debug`: Turn on verbose logging.
 
 ## Debug
 The program can be executed using an ad-hoc main.py file added for convenience:

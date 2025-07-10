@@ -5,10 +5,11 @@ from .files import FileRepo, FileSelector
 from .gitutils import GitRepository
 from .node import Node
 from .parser import ProjectParser
-from .utils import get_llm_model
+from .utils import get_llm_model, setup_logging
 
 
 def main():
+    setup_logging(True)
     repo_path = Path("./")
     config = ParserConfig(
         directory=repo_path,

@@ -1,3 +1,4 @@
+import logging
 import traceback
 from pathlib import Path
 
@@ -9,7 +10,9 @@ from .files import FileRepo, FileSelector
 from .gitutils import GitRepository
 from .node import Node
 from .parser import ProjectParser
-from .utils import get_llm_model
+from .utils import get_llm_model, setup_logging
+
+logger = logging.getLogger("llm_devtale")
 
 
 @llm.hookimpl
@@ -47,6 +50,12 @@ def register_commands(cli):
         is_flag=True,
         help="Show hierarchy and files that will be analyzed without using the LLM",
     )
+    @click.option(
+        "--debug",
+        "-d",
+        is_flag=True,
+        help="Turns on debug logging",
+    )
     def devtale(
         directory,
         exclude,
@@ -56,8 +65,10 @@ def register_commands(cli):
         model,
         filter_extension,
         dry_run,
+        debug,
     ):
         try:
+            setup_logging(verbose=debug)
             exclude_patterns = list(exclude)
             allowed_extensions = list(filter_extension)
 
@@ -84,13 +95,15 @@ def register_commands(cli):
                 max_token_count=config.max_tokens_per_project,
                 max_tokens_per_file=config.max_tokens_per_file,
             )
-
+            logger.debug(f"Files to be analyzed: {valid_files}")
             model = get_llm_model(model_name=config.model_name)
             project_parser: ProjectParser = ProjectParser(
                 parser_config=config, model=model, valid_files=valid_files
             )
             node: Node = project_parser.parse()
-            print("File Token count:", token_count)
+
+            click.echo(f"Total file Token count: {token_count}")
+
             result = node.to_string()
 
             if output:
