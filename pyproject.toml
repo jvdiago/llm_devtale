@@ -8,15 +8,16 @@ license = {text = "Apache-2.0"}
 authors = [
     {name = "Javier Vela", email = "jvdiago@dagorlad.es"}
 ]
-urls = {
-    "Repository" = "https://github.com/jvdiago/llm_devtale",
-}
+
 dependencies = [
     "click>=8.2.1",
     "gitpython>=3.1.44",
     "llm>=0.26",
     "tiktoken>=0.9.0",
 ]
+
+[project.urls]
+"Repository" = "https://github.com/jvdiago/llm_devtale"
 
 [dependency-groups]
 dev = [
