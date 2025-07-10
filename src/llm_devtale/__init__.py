@@ -4,6 +4,7 @@ from pathlib import Path
 
 import click
 import llm
+from rich.console import Console
 
 from .config import ParserConfig
 from .files import FileRepo, FileSelector
@@ -13,6 +14,7 @@ from .parser import ProjectParser
 from .utils import get_llm_model, setup_logging
 
 logger = logging.getLogger("llm_devtale")
+console = Console()
 
 
 @llm.hookimpl
@@ -104,15 +106,14 @@ def register_commands(cli):
 
             click.echo(f"Total file Token count: {token_count}")
 
-            result = node.to_string()
-
             if output:
+                result = node.to_string()
                 output_file = Path(output)
 
                 with open(output_file, "w") as f:
                     f.write(result)
             else:
-                click.echo(result)
+                console.print(node.to_tree())
         except Exception as e:
             click.secho(f"Error ({e.__class__.__name__}): {e!r}", fg="red")
             click.secho(traceback.format_exc(), fg="bright_black")

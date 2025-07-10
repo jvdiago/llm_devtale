@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from rich.console import Console
+
 from .config import ParserConfig
 from .files import FileRepo, FileSelector
 from .gitutils import GitRepository
@@ -10,6 +12,7 @@ from .utils import get_llm_model, setup_logging
 
 def main():
     setup_logging(True)
+    console = Console()
     repo_path = Path("./")
     config = ParserConfig(
         directory=repo_path,
@@ -33,7 +36,7 @@ def main():
     )
     node: Node = project_parser.parse()
     print("File Token count:", token_count)
-    node.print()
+    console.print(node.to_tree())
 
 
 if __name__ == "__main__":

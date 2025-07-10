@@ -1,6 +1,6 @@
 [project]
 name = "llm_devtale"
-version = "0.1.1"
+version = "0.2."
 description = "LLM plugin to create a hierarchical summary description of a project"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -13,6 +13,7 @@ dependencies = [
     "click>=8.2.1",
     "gitpython>=3.1.44",
     "llm>=0.26",
+    "rich>=14.0.0",
     "tiktoken>=0.9.0",
 ]
 

@@ -114,3 +114,8 @@ def setup_logging(verbose: bool = False) -> None:
 
     # Add console handler to root logger
     root_logger.addHandler(console_handler)
+
+    # Suppress verbose logging from libraries unless in debug mode
+    if not verbose:
+        for lib_logger_name in ["urllib3", "httpx"]:
+            logging.getLogger(lib_logger_name).setLevel(logging.WARNING)
