@@ -56,6 +56,27 @@ class TestProjectParser:
         assert node.description == mock_summary
         assert len(node.children) == 1
 
+    def test_parse_project_with_filter_folders(self, mocker):
+        parser_config = ParserConfig(filter_folders=["src"])
+        mock_summary = "summary"
+        mocker.patch("llm_devtale.parser.generate_summary", return_value=mock_summary)
+        project_parser = ProjectParser(
+            parser_config=parser_config,
+            model=None,  # type: ignore
+            valid_files=["src/file1.py", "src2/file2.py"],
+        )
+        mocker.patch.object(
+            FolderParser,
+            "parse",
+            return_value=Node(
+                name="folder1", node_type=NodeType.FOLDER, description="folder1 summary"
+            ),
+            auto_espec=True,
+        )
+
+        node: Node = project_parser.parse()
+        assert len(node.children) == 1
+
     def test_parse_project_with_folders_dry_run(self, mocker, test_repository):
         parser_config = ParserConfig(dry_run=True)
         project_parser = ProjectParser(

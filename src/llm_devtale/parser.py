@@ -78,6 +78,12 @@ class ProjectParser(Parser):
         # folders that should be ignored, and to use the process_folder logic.
         folders = list(set([os.path.dirname(file_path) for file_path in file_paths]))
 
+        if self.parser_config.filter_folders:
+            folders = [
+                os.path.normpath(os.path.join(self.root_path, f))
+                for f in self.parser_config.filter_folders
+            ]
+
         # sort to always have the root folder at the beggining of the list.
         folders: List[str] = sorted(folders, key=lambda path: path.count("/"))
 

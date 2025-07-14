@@ -176,6 +176,7 @@ class ParserConfig:
         default_factory=lambda: Path(os.path.expanduser("~/.cache/llm_devtale"))
     )
     dry_run: bool = False
+    filter_folders: List[str] = field(default_factory=list)
 
     def __post_init__(self):
         """Validate and normalize configuration after initialization."""

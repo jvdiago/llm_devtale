@@ -47,6 +47,12 @@ def register_commands(cli):
         help="Only include files with these extensions",
     )
     @click.option(
+        "--filter-folder",
+        "-k",
+        multiple=True,
+        help="Only include files with these folders",
+    )
+    @click.option(
         "--dry-run",
         "-t",
         is_flag=True,
@@ -66,6 +72,7 @@ def register_commands(cli):
         output,
         model,
         filter_extension,
+        filter_folder,
         dry_run,
         debug,
     ):
@@ -82,6 +89,7 @@ def register_commands(cli):
                 exclude_patterns=exclude_patterns,
                 allowed_extensions=allowed_extensions,
                 dry_run=dry_run,
+                filter_folders=filter_folder,
             )
             git_repo: GitRepository = GitRepository(directory)
             effort: dict[str, int] = git_repo.get_git_effort()

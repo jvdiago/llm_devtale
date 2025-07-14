@@ -1,6 +1,6 @@
 # llm-devtale
 
-`llm-devtale` is a plugin for the `llm` command-line tool that automatically generates documentation ("dev tales") for your source code projects. It analyzes your project's files and folders, considering factors like file size, git commit effort, and excluded patterns, to produce a hierarchical, LLM-generated summary of your codebase.
+`llm-devtale` is a plugin for [Simon Willison's LLM tool](https://github.com/simonw/llm) `llm` command-line tool that automatically generates documentation ("dev tales") for your source code projects. It analyzes your project's files and folders, considering factors like file size, git commit effort, and excluded patterns, to produce a hierarchical, LLM-generated summary of your codebase.
 
 The generated documentation includes:
 *   A high-level overview of the entire repository.
@@ -70,6 +70,13 @@ Only include Python (`.py`) and JavaScript (`.js`) files in the analysis (do NOT
 ```bash
 llm devtale . -f *.py -f *.js
 ```
+### Filter by directory
+
+Only include folders src/app and src/utils:
+```bash
+llm devtale . -k src/app -k src/utils
+```
+
 
 ### Limit token usage
 
@@ -96,6 +103,7 @@ llm devtale . --dry-run
 *   `-f, --filter-extension <EXTENSION>`: Only include files with these extensions (e.g., `py`, `md`). Can be used multiple times.
 *   `-t, --dry-run`: Show the hierarchy and files that will be analyzed without making LLM calls.
 *   `-d, --debug`: Turn on verbose logging.
+*   `-k, --filter-folder`: Only parse the specified folder(s)
 
 ## Debug
 The program can be executed using an ad-hoc main.py file added for convenience:
