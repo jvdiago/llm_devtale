@@ -77,7 +77,6 @@ Only include folders src/app and src/utils:
 llm devtale . -k src/app -k src/utils
 ```
 
-
 ### Limit token usage
 
 Specify the maximum number of tokens to send to the LLM for the entire project and per file:
@@ -92,6 +91,14 @@ See which files and folders would be analyzed without actually calling the LLM. 
 llm devtale . --dry-run
 ```
 
+### Add additional instructions to the prompt
+
+Add additional instructions to the end of all LLM prompts.
+```bash
+llm devtale -p "All summaries should be in uppercase" .
+```
+
+
 ## Options
 
 *   `DIRECTORY`: Path to the project directory (default: `.`)
@@ -99,11 +106,12 @@ llm devtale . --dry-run
 *   `--max-tokens <INT>`: Maximum total tokens to send to the LLM for the entire project.
 *   `--max-tokens-per-file <INT>`: Maximum tokens to process per individual file.
 *   `-o, --output <PATH>`: Output file path or directory to save the generated documentation.
-*   `-m, --model <MODEL_NAME>`: Specify the LLM model to use (e.g., `gpt-3.5-turbo`, `gpt-4`). If not set uses the default model configured in the llm cli tool
-*   `-f, --filter-extension <EXTENSION>`: Only include files with these extensions (e.g., `py`, `md`). Can be used multiple times.
+*   `-m, --model <MODEL_NAME>`: Specify the LLM model to use (e.g., `gpt4`). If not set uses the default model configured in the llm cli tool
+*   `-f, --filter-extension <EXTENSION>`: Only include files with these extensions (e.g., `*.py`, `*.md`). Can be used multiple times.
 *   `-t, --dry-run`: Show the hierarchy and files that will be analyzed without making LLM calls.
 *   `-d, --debug`: Turn on verbose logging.
 *   `-k, --filter-folder`: Only parse the specified folder(s)
+*   `-p, --prompt`: Additional prompt to be added at the end of the program prompt
 
 ## Debug
 The program can be executed using an ad-hoc main.py file added for convenience:

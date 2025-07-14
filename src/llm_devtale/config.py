@@ -177,6 +177,7 @@ class ParserConfig:
     )
     dry_run: bool = False
     filter_folders: List[str] = field(default_factory=list)
+    prompt: str = ""
 
     def __post_init__(self):
         """Validate and normalize configuration after initialization."""

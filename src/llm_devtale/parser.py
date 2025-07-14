@@ -130,7 +130,10 @@ class ProjectParser(Parser):
                 "project_readme": original_readme,
             }
             project_summary = generate_summary(
-                self.model, project_data, summary_type=NodeType.REPOSITORY
+                self.model,
+                project_data,
+                summary_type=NodeType.REPOSITORY,
+                additional_prompt=self.parser_config.prompt,
             )
             project_node.description = project_summary
 
@@ -182,7 +185,10 @@ class FolderParser(Parser):
             }
 
             folder_summary = generate_summary(
-                self.model, folder_data, summary_type=NodeType.FOLDER
+                self.model,
+                folder_data,
+                summary_type=NodeType.FOLDER,
+                additional_prompt=self.parser_config.prompt,
             )
             node_dir.description = folder_summary
 
@@ -208,7 +214,10 @@ class FileParser(Parser):
         }
         if not self.parser_config.dry_run:
             file_summary = generate_summary(
-                self.model, file_data, summary_type=NodeType.FILE
+                self.model,
+                file_data,
+                summary_type=NodeType.FILE,
+                additional_prompt=self.parser_config.prompt,
             )
             file_node.description = file_summary
 

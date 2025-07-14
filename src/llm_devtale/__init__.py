@@ -64,6 +64,12 @@ def register_commands(cli):
         is_flag=True,
         help="Turns on debug logging",
     )
+    @click.option(
+        "-p",
+        "--prompt",
+        type=str,
+        help="Additional prompt to be included at the end in the summarization instructions",
+    )
     def devtale(
         directory,
         exclude,
@@ -75,6 +81,7 @@ def register_commands(cli):
         filter_folder,
         dry_run,
         debug,
+        prompt,
     ):
         try:
             setup_logging(verbose=debug)
@@ -90,6 +97,7 @@ def register_commands(cli):
                 allowed_extensions=allowed_extensions,
                 dry_run=dry_run,
                 filter_folders=filter_folder,
+                prompt=prompt,
             )
             git_repo: GitRepository = GitRepository(directory)
             effort: dict[str, int] = git_repo.get_git_effort()

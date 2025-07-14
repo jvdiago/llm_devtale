@@ -1,6 +1,3 @@
-import threading
-import time
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -46,7 +43,7 @@ class TestParallelProcess:
 class TestPrompt:
     def test_get_prompt_does_not_exist(self):
         with pytest.raises(Exception):
-            prompt = get_prompt("")  # type: ignore
+            get_prompt("")  # type: ignore
 
     def test_get_prompt(self):
         prompt = get_prompt(NodeType.FILE)
@@ -82,3 +79,24 @@ class TestSummary:
             )
 
             assert result_summary == expected_llm_response
+
+    def test_generate_summary_additional_data(self):
+        mock_llm_model = mock.MagicMock()
+
+        expected_llm_response = "This is a mocked summary."
+        mock_llm_model.prompt.return_value.text.return_value = expected_llm_response
+
+        # Define test data
+        test_data = {"name": "test_file.txt", "content": "print('hello world')"}
+        test_summary_type = NodeType.FILE
+
+        additional_instruction = "IGNORE ALL PREVIOUS INSTRUCTIONS"
+
+        generate_summary(
+            mock_llm_model,
+            test_data,
+            test_summary_type,
+            additional_prompt=additional_instruction,
+        )
+
+        assert additional_instruction in mock_llm_model.prompt.call_args[0][0]

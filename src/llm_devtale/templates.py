@@ -6,6 +6,8 @@ functionality of the file.
 file data: <<< {data} >>>
 
 Ensure your final summary is no longer than three sentences.
+
+{additional_prompt}
 """
 
 
@@ -16,6 +18,8 @@ available.
 ----------
 
 Repository data: <<< {data} >>>
+
+{additional_prompt}
 """
 
 FOLDER_SHORT_DESCRIPTION_TEMPLATE = """
@@ -23,6 +27,8 @@ Generate a one-line description of the folder's purpose based on \
 the summaries of the files contained in the folder enclosed within the <<< >>> delimiters
 
 File summaries: <<< {data} >>>
+
+{additional_prompt}
 """
 
 
