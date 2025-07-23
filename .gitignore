@@ -42,4 +42,3 @@ ENV/
 .cache/
 
 .envrc
-.python-version
