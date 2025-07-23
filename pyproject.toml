@@ -1,6 +1,6 @@
 [project]
 name = "llm_devtale"
-version = "0.2.2"
+version = "0.2.3"
 description = "LLM plugin to create a hierarchical summary description of a project"
 readme = "README.md"
 requires-python = ">=3.12"
