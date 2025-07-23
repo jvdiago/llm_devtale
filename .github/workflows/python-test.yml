@@ -34,7 +34,6 @@ jobs:
 
       - name: Run linter
         uses: astral-sh/ruff-action@v3
-        run: ruff check
 
       - name: Run tests
         run: uv run pytest
